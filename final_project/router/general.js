@@ -4,6 +4,8 @@ let isValid = require("./auth_users.js").isValid;
 let users = require("./auth_users.js").users;
 const public_users = express.Router();
 
+const axios = require('axios')
+
 
 public_users.post("/register", (req,res) => {
   const username = req.body.username;
@@ -26,13 +28,30 @@ public_users.post("/register", (req,res) => {
 
 // Get the book list available in the shop
 public_users.get('/',function (req, res) {
-
   if(books) {
     return res.status(200).send(JSON.stringify(books, null, 4))
   } else {
-    return res.status(404).json({message: "No books were found."});
+    return res.status(404).json({message: "No books were found."})
   }
 });
+
+
+// fetch all using async-await and axios:
+const fetchBooks = async () => {
+  try {
+    const response = await axios.get('http://localhost:5000/')
+    console.log('Books fetched successfully:', response.data)
+
+  } catch (error) {
+    console.error('Error fetching books:', error.message)
+  }
+}
+
+fetchBooks()
+
+
+
+
 
 // Get book details based on ISBN
 public_users.get('/isbn/:isbn',function (req, res) {
@@ -45,8 +64,22 @@ public_users.get('/isbn/:isbn',function (req, res) {
   }
  });
 
+ // fetch by ISBN using Promises, which Axios is based on
+ const getBookISBN = (isbn) => {
+  
+  axios.get(`http://localhost:5000/isbn/${isbn}`)
+    .then((response) => {
+      console.log('Book details fetched successfully:', response.data)
+    })
+    .catch((error) => {
+      console.error('Error fetching books by ISBN, details:', error.message)
+    })
+};
 
- 
+getBookISBN(isbn);
+
+
+
 // Get book details based on author
 public_users.get('/author/:author',function (req, res) {
   const author = req.params.author
@@ -72,6 +105,17 @@ public_users.get('/author/:author',function (req, res) {
 });
 
 
+// fetch by author using async-await and axios
+async function getBookAuthor(author) {
+  try {
+    const response = await axios.get(`http://localhost:5000/author/${author}`)
+    console.log('Books by author:', response.data);
+  } catch (error) {
+      console.error('Error fetching books by Author, details:', error.message)
+    }
+}
+
+
 // Get all books based on title
 public_users.get('/title/:title',function (req, res) {
   const title = req.params.title
@@ -95,6 +139,20 @@ public_users.get('/title/:title',function (req, res) {
     return res.status(404).json({ message: "Title is missing."})
   }
 });
+
+
+
+// fetch books by title using async-await and axios
+async function getBookTitle(title) {
+  try {
+    const response = await axios.get(`http://localhost:5000/title/${title}`)
+    console.log('Books by title:', response.data);
+  } catch (error) {
+      console.error('Error fetching books by Title, details:', error.message)
+    }
+}
+
+getBookTitle(title)
 
 
 //  Get book review
